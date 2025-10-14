@@ -1,9 +1,8 @@
 // src/components/Sidebar.jsx
 import { NavLink, useParams } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import { 
   StickyNote, 
-  Image as ImageIcon, 
-  FileText, 
   LayoutGrid,
   MessageSquare,
   Settings,
@@ -13,11 +12,10 @@ import {
 
 function Sidebar({ isOpen, onToggle }) {
   const { synchoId } = useParams();
+  const { theme } = useTheme();
 
   const navItems = [
     { to: `notes`, icon: <StickyNote size={20} />, label: 'Ghi chú' },
-    { to: `images`, icon: <ImageIcon size={20} />, label: 'Hình ảnh' },
-    { to: `docs`, icon: <FileText size={20} />, label: 'Tài liệu' },
     { to: `kanban`, icon: <LayoutGrid size={20} />, label: 'Kanban' },
     { to: `whiteboard`, icon: <MessageSquare size={20} />, label: 'Bảng trắng' }
   ];
@@ -28,7 +26,7 @@ function Sidebar({ isOpen, onToggle }) {
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="fixed bottom-6 left-6 z-50 lg:hidden p-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full shadow-2xl transition-all duration-300 hover:scale-110"
+          className={`fixed bottom-6 left-6 z-50 lg:hidden p-4 ${theme.bgSecondary} hover:${theme.bgTertiary} ${theme.text} rounded-full shadow-2xl transition-all duration-300 hover:scale-110`}
           aria-label="Toggle sidebar"
         >
           <Menu size={24} />
@@ -47,19 +45,19 @@ function Sidebar({ isOpen, onToggle }) {
       <aside
         className={`
           fixed lg:sticky top-0 left-0 z-40 h-screen
-          w-72 bg-slate-800 border-r border-slate-700 
+          w-72 ${theme.bgSecondary} border-r ${theme.border} 
           flex flex-col
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
         {/* Header */}
-        <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white truncate">{synchoId}</h2>
+        <div className={`p-4 border-b ${theme.border} flex items-center justify-between`}>
+          <h2 className={`text-lg font-semibold ${theme.text} truncate`}>{synchoId}</h2>
           {/* Close button - only visible on mobile when open */}
           <button
             onClick={onToggle}
-            className="lg:hidden p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className={`lg:hidden p-2 hover:${theme.bgTertiary} rounded-lg transition-colors`}
             aria-label="Close sidebar"
           >
             <X size={20} />
@@ -82,8 +80,8 @@ function Sidebar({ isOpen, onToggle }) {
                   className={({ isActive }) => 
                     `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive 
-                        ? 'bg-slate-700 text-white shadow-lg' 
-                        : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                        ? `${theme.bgTertiary} ${theme.text} shadow-lg` 
+                        : `${theme.textSecondary} hover:${theme.bgTertiary} hover:${theme.text}`
                     }`
                   }
                 >
@@ -96,7 +94,7 @@ function Sidebar({ isOpen, onToggle }) {
         </nav>
 
         {/* Settings */}
-        <div className="p-4 border-t border-slate-700">
+        <div className={`p-4 border-t ${theme.border}`}>
           <NavLink
             to={`/s/${synchoId}/settings`}
             onClick={() => {
@@ -108,8 +106,8 @@ function Sidebar({ isOpen, onToggle }) {
             className={({ isActive }) => 
               `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive 
-                  ? 'bg-slate-700 text-white shadow-lg' 
-                  : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                  ? `${theme.bgTertiary} ${theme.text} shadow-lg` 
+                  : `${theme.textSecondary} hover:${theme.bgTertiary} hover:${theme.text}`
               }`
             }
           >

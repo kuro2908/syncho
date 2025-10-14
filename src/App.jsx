@@ -1,29 +1,31 @@
 // src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useTheme } from './contexts/ThemeContext';
 import HomePage from './pages/HomePage';
 import WorkspacePage from './pages/WorkspacePage';
 import NotesPage from './pages/NotesPage';
 import NoteEditorPage from './pages/NoteEditorPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Placeholder components for other routes
-function ImagesPage() {
-  return <div className="p-8">Images Page</div>;
-}
-
-function DocsPage() {
-  return <div className="p-8">Docs Page</div>;
-}
-
 function KanbanPage() {
-  return <div className="p-8">Kanban Page</div>;
+  const { theme } = useTheme();
+  return (
+    <div className={`p-8 ${theme.bg} ${theme.text} min-h-screen`}>
+      <h1 className="text-2xl font-bold mb-4">Kanban Board</h1>
+      <p className={theme.textMuted}>Tính năng đang được phát triển...</p>
+    </div>
+  );
 }
 
 function WhiteboardPage() {
-  return <div className="p-8">Whiteboard Page</div>;
-}
-
-function SettingsPage() {
-  return <div className="p-8">Settings Page</div>;
+  const { theme } = useTheme();
+  return (
+    <div className={`p-8 ${theme.bg} ${theme.text} min-h-screen`}>
+      <h1 className="text-2xl font-bold mb-4">Whiteboard</h1>
+      <p className={theme.textMuted}>Tính năng đang được phát triển...</p>
+    </div>
+  );
 }
 
 function App() {
@@ -35,8 +37,6 @@ function App() {
           <Route index element={<Navigate to="notes" replace />} />
           <Route path="notes" element={<NotesPage />} />
           <Route path="notes/:noteId" element={<NoteEditorPage />} />
-          <Route path="images" element={<ImagesPage />} />
-          <Route path="docs" element={<DocsPage />} />
           <Route path="kanban" element={<KanbanPage />} />
           <Route path="whiteboard" element={<WhiteboardPage />} />
           <Route path="settings" element={<SettingsPage />} />

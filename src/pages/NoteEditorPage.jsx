@@ -3,21 +3,34 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot, updateDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useTheme } from '../contexts/ThemeContext';
 import { ArrowLeft, Save, Check, Trash2, Clock, Sparkles } from 'lucide-react';
 import StyledInput from '../components/StyledInput';
-import StyledTextarea from '../components/StyledTextarea';
+import RichTextEditor from '../components/RichTextEditor';
 
 function NoteEditorPage() {
   const { synchoId, noteId } = useParams();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [note, setNote] = useState(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const titleInputRef = useRef(null);
   const contentTextareaRef = useRef(null);
+
+  // Handle scroll to shrink header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Set up real-time listener for the note
   useEffect(() => {
@@ -109,15 +122,15 @@ function NoteEditorPage() {
 
   if (!note) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
+      <div className={`min-h-screen ${theme.bg} flex items-center justify-center p-8`}>
         <div className="max-w-4xl w-full mx-auto">
           <div className="animate-pulse space-y-8">
-            <div className="h-16 bg-slate-800/50 rounded-lg w-2/3"></div>
+            <div className={`h-16 ${theme.bgSecondary} rounded-lg w-2/3`}></div>
             <div className="space-y-4">
-              <div className="h-6 bg-slate-800/50 rounded w-full"></div>
-              <div className="h-6 bg-slate-800/50 rounded w-5/6"></div>
-              <div className="h-6 bg-slate-800/50 rounded w-4/5"></div>
-              <div className="h-6 bg-slate-800/50 rounded w-3/4"></div>
+              <div className={`h-6 ${theme.bgSecondary} rounded w-full`}></div>
+              <div className={`h-6 ${theme.bgSecondary} rounded w-5/6`}></div>
+              <div className={`h-6 ${theme.bgSecondary} rounded w-4/5`}></div>
+              <div className={`h-6 ${theme.bgSecondary} rounded w-3/4`}></div>
             </div>
           </div>
         </div>
@@ -126,33 +139,35 @@ function NoteEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
-      {/* Elegant Top Bar */}
-      <div className="border-b border-slate-700/30 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-10 shadow-lg">
-        <div className="max-w-6xl mx-auto px-8 lg:px-16 py-6 flex items-center justify-between">
+    <div className={`min-h-screen ${theme.bg}`} style={{ '--header-height': isScrolled ? '56px' : '72px' }}>
+      {/* Elegant Top Bar - Shrinks on scroll */}
+      <div className={`border-b ${theme.border} ${theme.bgSecondary} backdrop-blur-xl sticky top-0 z-50 shadow-lg transition-all duration-300 ${isScrolled ? 'py-2' : ''}`}>
+        <div className={`max-w-6xl mx-auto px-4 md:px-8 lg:px-16 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4 md:py-6'}`}>
           {/* Back Button */}
           <button
             onClick={() => navigate(`/s/${synchoId}/notes`)}
-            className="flex items-center gap-3 text-slate-400 hover:text-sky-400 transition-all duration-300 group -ml-2 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"
+            className={`flex items-center gap-2 ${theme.textMuted} hover:${theme.accentText} transition-all duration-300 group -ml-2 px-3 py-2 rounded-xl hover:${theme.bgTertiary}`}
           >
-            <ArrowLeft size={22} className="group-hover:-translate-x-2 transition-transform duration-300" />
-            <span className="font-semibold text-base">Ghi chú</span>
+            <ArrowLeft size={isScrolled ? 18 : 22} className="group-hover:-translate-x-2 transition-all duration-300" />
+            {!isScrolled && <span className="font-semibold text-base">Ghi chú</span>}
           </button>
           
-          <div className="flex items-center gap-8">
+          <div className={`flex items-center transition-all duration-300 ${isScrolled ? 'gap-2' : 'gap-4'}`}>
             {/* Save Status with Animation */}
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-800/50">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${theme.bgTertiary} transition-all duration-300 ${isScrolled ? 'text-xs' : ''}`}>
               {isSaving ? (
                 <>
-                  <Save size={18} className="text-sky-400 animate-spin" />
-                  <span className="text-sm text-slate-300 font-medium">Đang lưu...</span>
+                  <Save size={isScrolled ? 14 : 18} className={`${theme.accentText} animate-spin`} />
+                  {!isScrolled && <span className={`text-sm ${theme.textSecondary} font-medium`}>Đang lưu...</span>}
                 </>
               ) : (
                 <>
-                  <Check size={18} className="text-emerald-400" />
-                  <span className="text-sm text-emerald-400 font-medium">
-                    {lastSaved ? `Đã lưu ${formatLastSaved()}` : 'Đã lưu'}
-                  </span>
+                  <Check size={isScrolled ? 14 : 18} className="text-emerald-400" />
+                  {!isScrolled && (
+                    <span className="text-sm text-emerald-400 font-medium">
+                      {lastSaved ? `Đã lưu ${formatLastSaved()}` : 'Đã lưu'}
+                    </span>
+                  )}
                 </>
               )}
             </div>
@@ -160,22 +175,21 @@ function NoteEditorPage() {
             {/* Delete Button */}
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="p-3 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300 hover:scale-110"
+              className={`${theme.textMuted} hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300 hover:scale-110 ${isScrolled ? 'p-2' : 'p-3'}`}
               title="Xóa ghi chú"
             >
-              <Trash2 size={20} />
+              <Trash2 size={isScrolled ? 16 : 20} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Editor Area with Glass Effect */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-8 lg:px-16 py-16">
+      {/* Main Editor Area */}
+      <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-16 py-8 md:py-16">
           {/* Decorative Header */}
           <div className="flex items-center gap-3 mb-12">
-            <Sparkles size={28} className="text-sky-400" />
-            <h2 className="text-2xl font-bold text-slate-300">Tạo ghi chú của bạn</h2>
+            <Sparkles size={28} className={theme.accentText} />
+            <h2 className={`text-2xl font-bold ${theme.textSecondary}`}>Tạo ghi chú của bạn</h2>
           </div>
 
           {/* Title Input with Styled Component */}
@@ -189,9 +203,9 @@ function NoteEditorPage() {
           </div>
           
           {/* Metadata Bar with Enhanced Design */}
-          <div className="flex flex-wrap items-center gap-6 text-sm text-slate-400 mb-12 pb-8 border-b border-slate-700/50">
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 rounded-full">
-              <Clock size={16} className="text-sky-400" />
+          <div className={`flex flex-wrap items-center gap-6 text-sm ${theme.textMuted} mb-12 pb-8 border-b ${theme.border}`}>
+            <div className={`flex items-center gap-2 px-4 py-2 ${theme.bgTertiary} rounded-full`}>
+              <Clock size={16} className={theme.accentText} />
               <span className="font-medium">
                 {note?.updatedAt?.toDate?.().toLocaleDateString('vi-VN', {
                   day: '2-digit',
@@ -202,23 +216,21 @@ function NoteEditorPage() {
                 }) || 'Vừa tạo'}
               </span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 rounded-full">
+            <div className={`flex items-center gap-2 px-4 py-2 ${theme.bgTertiary} rounded-full`}>
               <span className="font-medium">{content.length} ký tự</span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 rounded-full">
+            <div className={`flex items-center gap-2 px-4 py-2 ${theme.bgTertiary} rounded-full`}>
               <span className="font-medium">{content.split(/\s+/).filter(w => w.length > 0).length} từ</span>
             </div>
           </div>
           
-          {/* Content Textarea with Styled Component */}
-          <div className="mb-16">
-            <StyledTextarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Bắt đầu viết nội dung của bạn..."
-              className="content-textarea"
-            />
-          </div>
+        {/* Rich Text Editor */}
+        <div className="mb-16">
+          <RichTextEditor
+            value={content}
+            onChange={setContent}
+            placeholder="Bắt đầu viết nội dung của bạn..."
+          />
         </div>
       </div>
 
@@ -229,7 +241,7 @@ function NoteEditorPage() {
           onClick={() => setShowDeleteConfirm(false)}
         >
           <div 
-            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl shadow-2xl max-w-lg w-full p-10 border border-slate-700/50 animate-in zoom-in-95 duration-300"
+            className={`${theme.bgSecondary} rounded-3xl shadow-2xl max-w-lg w-full p-10 border ${theme.border} animate-in zoom-in-95 duration-300`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-5 mb-8">
@@ -237,20 +249,20 @@ function NoteEditorPage() {
                 <Trash2 size={32} className="text-red-400" />
               </div>
               <div>
-                <h3 className="text-3xl font-bold text-white mb-3">Xóa ghi chú?</h3>
-                <p className="text-slate-400 text-base">Hành động này không thể hoàn tác</p>
+                <h3 className={`text-3xl font-bold ${theme.text} mb-3`}>Xóa ghi chú?</h3>
+                <p className={`${theme.textMuted} text-base`}>Hành động này không thể hoàn tác</p>
               </div>
             </div>
             
-            <p className="text-slate-300 mb-10 leading-relaxed text-lg">
+            <p className={`${theme.textSecondary} mb-10 leading-relaxed text-lg`}>
               Bạn có chắc chắn muốn xóa ghi chú{' '}
-              <span className="font-bold text-white">"{title || 'Không có tiêu đề'}"</span>?
+              <span className={`font-bold ${theme.text}`}>"{title || 'Không có tiêu đề'}"</span>?
             </p>
             
             <div className="flex gap-4">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-6 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-2xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className={`flex-1 px-6 py-4 ${theme.bgTertiary} hover:opacity-80 ${theme.text} rounded-2xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg`}
               >
                 Hủy
               </button>
