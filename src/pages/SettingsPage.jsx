@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Palette, Moon, Sun, Check } from 'lucide-react';
+import { Palette, Moon, Sun, Check, LogOut } from 'lucide-react';
 
 function SettingsPage() {
   const { theme, currentTheme, changeTheme, themes } = useTheme();
+  const navigate = useNavigate();
 
   const themeOptions = [
     { id: 'dark', name: 'Dark Mode', icon: Moon, preview: 'bg-slate-900' },
@@ -83,10 +85,32 @@ function SettingsPage() {
           </div>
         </div>
 
-        {/* Additional Settings Placeholder */}
+        {/* Additional Settings */}
         <div className={`${theme.bgSecondary} rounded-2xl p-6 ${theme.border} border mt-6`}>
           <h2 className="text-xl font-bold mb-4">Cài đặt khác</h2>
-          <p className={theme.textMuted}>Các tùy chọn bổ sung sẽ được thêm vào sau...</p>
+          
+          {/* Exit Syncho Button */}
+          <button
+            onClick={() => navigate('/')}
+            className={`w-full flex items-center justify-between p-4 ${theme.bgTertiary} hover:bg-red-500/10 rounded-xl transition-all duration-300 group border-2 border-transparent hover:border-red-500/50`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-500/20 rounded-lg group-hover:bg-red-500/30 transition-colors">
+                <LogOut size={20} className="text-red-400" />
+              </div>
+              <div className="text-left">
+                <h3 className={`font-semibold ${theme.text} group-hover:text-red-400 transition-colors`}>
+                  Thoát Syncho
+                </h3>
+                <p className={`text-sm ${theme.textMuted}`}>
+                  Quay về trang chủ
+                </p>
+              </div>
+            </div>
+            <div className="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              →
+            </div>
+          </button>
         </div>
       </div>
     </div>

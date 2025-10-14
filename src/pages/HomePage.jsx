@@ -7,11 +7,14 @@ function HomePage() {
   const [createId, setCreateId] = useState('');
   const [accessId, setAccessId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showAccessPasswordModal, setShowAccessPasswordModal] = useState(false);
+  const [tempPassword, setTempPassword] = useState('');
+  const [pendingSynchoId, setPendingSynchoId] = useState('');
   const navigate = useNavigate();
 
   const handleCreateWorkspace = async (e) => {
     e.preventDefault();
-    console.log('Create workspace clicked'); // Debug log
     
     if (!createId.trim()) {
       alert('Vui lòng nhập SynchoID!');
@@ -20,27 +23,48 @@ function HomePage() {
 
     setIsLoading(true);
     try {
-      console.log('Checking if document exists...'); // Debug log
       const docRef = doc(db, 'storages', createId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         alert('SynchoID này đã tồn tại. Vui lòng chọn ID khác.');
+        setIsLoading(false);
         return;
       }
 
-      console.log('Creating new document...'); // Debug log
-      await setDoc(docRef, {
-        id: createId,
-        name: createId,
+      // Show password modal
+      setPendingSynchoId(createId);
+      setShowPasswordModal(true);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Lỗi khi tạo Syncho:', error);
+      alert(`Đã xảy ra lỗi: ${error.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  const handleConfirmCreate = async (password) => {
+    setIsLoading(true);
+    try {
+      const synchoData = {
+        id: pendingSynchoId,
+        name: pendingSynchoId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      
+      if (password) {
+        synchoData.password = password;
+      }
+      
+      const docRef = doc(db, 'storages', pendingSynchoId);
+      await setDoc(docRef, synchoData);
 
-      console.log('Document created, navigating...'); // Debug log
-      navigate(`/s/${createId}`);
+      setShowPasswordModal(false);
+      setTempPassword('');
+      navigate(`/s/${pendingSynchoId}`);
     } catch (error) {
-      console.error('Lỗi khi tạo workspace:', error);
+      console.error('Lỗi khi tạo Syncho:', error);
       alert(`Đã xảy ra lỗi: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -49,7 +73,6 @@ function HomePage() {
 
   const handleAccessWorkspace = async (e) => {
     e.preventDefault();
-    console.log('Access workspace clicked'); // Debug log
     
     if (!accessId.trim()) {
       alert('Vui lòng nhập SynchoID!');
@@ -58,20 +81,51 @@ function HomePage() {
 
     setIsLoading(true);
     try {
-      console.log('Checking workspace...'); // Debug log
       const docRef = doc(db, 'storages', accessId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        console.log('Workspace found, navigating...'); // Debug log
-        navigate(`/s/${accessId}`);
+        const synchoData = docSnap.data();
+        
+        // Check if Syncho has password
+        if (synchoData.password) {
+          // Show password modal
+          setPendingSynchoId(accessId);
+          setShowAccessPasswordModal(true);
+          setIsLoading(false);
+        } else {
+          // Public Syncho, access directly
+          navigate(`/s/${accessId}`);
+        }
       } else {
-        alert('Không tìm thấy workspace. Vui lòng kiểm tra lại SynchoID.');
+        alert('Không tìm thấy Syncho. Vui lòng kiểm tra lại SynchoID.');
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error('Lỗi khi truy cập workspace:', error);
+      console.error('Lỗi khi truy cập Syncho:', error);
       alert(`Đã xảy ra lỗi: ${error.message}`);
-    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleConfirmAccess = async (password) => {
+    setIsLoading(true);
+    try {
+      const docRef = doc(db, 'storages', pendingSynchoId);
+      const docSnap = await getDoc(docRef);
+      const synchoData = docSnap.data();
+
+      if (password === synchoData.password) {
+        setShowAccessPasswordModal(false);
+        setTempPassword('');
+        navigate(`/s/${pendingSynchoId}`);
+      } else {
+        alert('Mật khẩu không đúng. Vui lòng thử lại.');
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error('Lỗi:', error);
+      alert(`Đã xảy ra lỗi: ${error.message}`);
       setIsLoading(false);
     }
   };
@@ -80,10 +134,10 @@ function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col items-center justify-center p-4">
       <div className="text-center mb-12 animate-fade-in">
         <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-teal-400">
-          Syncho Workspace
+          Syncho By Kuro
         </h1>
         <p className="text-slate-300 text-xl md:text-2xl font-light">
-          Làm việc nhóm dễ dàng và hiệu quả
+          Làm việc dễ dàng và hiệu quả
         </p>
       </div>
 
@@ -102,13 +156,13 @@ function HomePage() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold ml-3 bg-gradient-to-r from-sky-400 to-teal-400 bg-clip-text text-transparent">
-                Tạo Workspace mới
+                Tạo Syncho mới
               </h2>
             </div>
             <div className="space-y-6">
               <div>
                 <label htmlFor="createId" className="block text-sm font-medium text-slate-300 mb-1">
-                  Nhập tên Workspace
+                  Nhập tên Syncho
                 </label>
                 <div className="relative">
                   <input
@@ -116,7 +170,7 @@ function HomePage() {
                     type="text"
                     value={createId}
                     onChange={(e) => setCreateId(e.target.value)}
-                    placeholder="Ví dụ: workspace-cua-toi"
+                    placeholder="Ví dụ: syncho-cua-toi"
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-transparent placeholder-slate-500 transition-all duration-200"
                     disabled={isLoading}
                     required
@@ -141,7 +195,7 @@ function HomePage() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
-                    <span>Tạo Workspace</span>
+                    <span>Tạo Syncho</span>
                   </>
                 )}
               </button>
@@ -163,13 +217,13 @@ function HomePage() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold ml-3 bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-                Truy cập Workspace
+                Truy cập Syncho
               </h2>
             </div>
             <div className="space-y-6">
               <div>
                 <label htmlFor="accessId" className="block text-sm font-medium text-slate-300 mb-1">
-                  Nhập ID Workspace
+                  Nhập ID Syncho
                 </label>
                 <div className="relative">
                   <input
@@ -177,7 +231,7 @@ function HomePage() {
                     type="text"
                     value={accessId}
                     onChange={(e) => setAccessId(e.target.value)}
-                    placeholder="Dán ID workspace vào đây"
+                    placeholder="Dán ID Syncho vào đây"
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-transparent placeholder-slate-500 transition-all duration-200"
                     disabled={isLoading}
                     required
@@ -213,9 +267,107 @@ function HomePage() {
 
       {/* Footer */}
       <div className="mt-16 text-center text-slate-500 text-sm">
-        <p>Bắt đầu làm việc nhóm ngay hôm nay với Syncho Workspace</p>
+        
         <p className="mt-1">© {new Date().getFullYear()} Syncho. All rights reserved.</p>
       </div>
+
+      {/* Password Modal for Creating Syncho */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-700 animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-sky-400 to-teal-400 bg-clip-text text-transparent">
+              Bảo mật Syncho
+            </h3>
+            <p className="text-slate-300 mb-6">
+              Bạn có muốn đặt mật khẩu cho Syncho này không?
+            </p>
+            
+            <div className="space-y-4 mb-6">
+              <input
+                type="password"
+                value={tempPassword}
+                onChange={(e) => setTempPassword(e.target.value)}
+                placeholder="Nhập mật khẩu (tùy chọn)"
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-transparent placeholder-slate-500"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-slate-400">
+                Bỏ trống để tạo Syncho công khai
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setTempPassword('');
+                }}
+                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                disabled={isLoading}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => handleConfirmCreate(tempPassword)}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white rounded-xl transition-all"
+                disabled={isLoading}
+              >
+                {tempPassword ? 'Tạo với mật khẩu' : 'Tạo công khai'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Modal for Accessing Syncho */}
+      {showAccessPasswordModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-700 animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
+              Nhập mật khẩu
+            </h3>
+            <p className="text-slate-300 mb-6">
+              Syncho này yêu cầu mật khẩu để truy cập
+            </p>
+            
+            <div className="space-y-4 mb-6">
+              <input
+                type="password"
+                value={tempPassword}
+                onChange={(e) => setTempPassword(e.target.value)}
+                placeholder="Nhập mật khẩu"
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-transparent placeholder-slate-500"
+                disabled={isLoading}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && tempPassword) {
+                    handleConfirmAccess(tempPassword);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowAccessPasswordModal(false);
+                  setTempPassword('');
+                }}
+                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                disabled={isLoading}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => handleConfirmAccess(tempPassword)}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl transition-all disabled:opacity-50"
+                disabled={isLoading || !tempPassword}
+              >
+                Truy cập
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
