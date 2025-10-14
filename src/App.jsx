@@ -6,6 +6,7 @@ import WorkspacePage from './pages/WorkspacePage';
 import NotesPage from './pages/NotesPage';
 import NoteEditorPage from './pages/NoteEditorPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
 
 // Placeholder components for other routes
 function KanbanPage() {
@@ -40,6 +41,7 @@ function App() {
           <Route path="kanban" element={<KanbanPage />} />
           <Route path="whiteboard" element={<WhiteboardPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="admin" element={<AdminPage />} />
         </Route>
       </Routes>
     </div>

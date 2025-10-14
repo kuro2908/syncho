@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useToast } from '../contexts/ToastContext';
 
 function HomePage() {
   const [createId, setCreateId] = useState('');
@@ -9,15 +10,17 @@ function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showAccessPasswordModal, setShowAccessPasswordModal] = useState(false);
+  const [showLockedModal, setShowLockedModal] = useState(false);
   const [tempPassword, setTempPassword] = useState('');
   const [pendingSynchoId, setPendingSynchoId] = useState('');
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleCreateWorkspace = async (e) => {
     e.preventDefault();
     
     if (!createId.trim()) {
-      alert('Vui lòng nhập SynchoID!');
+      showToast('Vui lòng nhập SynchoID!', 'warning');
       return;
     }
 
@@ -27,7 +30,7 @@ function HomePage() {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        alert('SynchoID này đã tồn tại. Vui lòng chọn ID khác.');
+        showToast('SynchoID này đã tồn tại. Vui lòng chọn ID khác.', 'error');
         setIsLoading(false);
         return;
       }
@@ -38,7 +41,7 @@ function HomePage() {
       setIsLoading(false);
     } catch (error) {
       console.error('Lỗi khi tạo Syncho:', error);
-      alert(`Đã xảy ra lỗi: ${error.message}`);
+      showToast(`Đã xảy ra lỗi: ${error.message}`, 'error');
       setIsLoading(false);
     }
   };
@@ -62,10 +65,11 @@ function HomePage() {
 
       setShowPasswordModal(false);
       setTempPassword('');
+      showToast('Tạo Syncho thành công!', 'success');
       navigate(`/s/${pendingSynchoId}`);
     } catch (error) {
       console.error('Lỗi khi tạo Syncho:', error);
-      alert(`Đã xảy ra lỗi: ${error.message}`);
+      showToast(`Đã xảy ra lỗi: ${error.message}`, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +79,7 @@ function HomePage() {
     e.preventDefault();
     
     if (!accessId.trim()) {
-      alert('Vui lòng nhập SynchoID!');
+      showToast('Vui lòng nhập SynchoID!', 'warning');
       return;
     }
 
@@ -86,6 +90,13 @@ function HomePage() {
 
       if (docSnap.exists()) {
         const synchoData = docSnap.data();
+        
+        // Check if Syncho is locked
+        if (synchoData.isLocked) {
+          setShowLockedModal(true);
+          setIsLoading(false);
+          return;
+        }
         
         // Check if Syncho has password
         if (synchoData.password) {
@@ -98,12 +109,12 @@ function HomePage() {
           navigate(`/s/${accessId}`);
         }
       } else {
-        alert('Không tìm thấy Syncho. Vui lòng kiểm tra lại SynchoID.');
+        showToast('Không tìm thấy Syncho. Vui lòng kiểm tra lại SynchoID.', 'error');
         setIsLoading(false);
       }
     } catch (error) {
       console.error('Lỗi khi truy cập Syncho:', error);
-      alert(`Đã xảy ra lỗi: ${error.message}`);
+      showToast(`Đã xảy ra lỗi: ${error.message}`, 'error');
       setIsLoading(false);
     }
   };
@@ -120,12 +131,12 @@ function HomePage() {
         setTempPassword('');
         navigate(`/s/${pendingSynchoId}`);
       } else {
-        alert('Mật khẩu không đúng. Vui lòng thử lại.');
+        showToast('Mật khẩu không đúng. Vui lòng thử lại.', 'error');
         setIsLoading(false);
       }
     } catch (error) {
       console.error('Lỗi:', error);
-      alert(`Đã xảy ra lỗi: ${error.message}`);
+      showToast(`Đã xảy ra lỗi: ${error.message}`, 'error');
       setIsLoading(false);
     }
   };
@@ -363,6 +374,35 @@ function HomePage() {
                 disabled={isLoading || !tempPassword}
               >
                 Truy cập
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Locked Syncho Modal */}
+      {showLockedModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 border border-red-500/50 animate-in zoom-in-95 duration-200">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-2 text-red-400">
+                Syncho đã bị khóa
+              </h3>
+              <p className="text-slate-300 mb-6">
+                Syncho này đã bị quản trị viên khóa và không thể truy cập.
+              </p>
+              
+              <button
+                onClick={() => setShowLockedModal(false)}
+                className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-semibold"
+              >
+                Đóng
               </button>
             </div>
           </div>

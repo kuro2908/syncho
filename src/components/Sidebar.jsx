@@ -1,11 +1,15 @@
 // src/components/Sidebar.jsx
 import { NavLink, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useTheme } from '../contexts/ThemeContext';
 import { 
   StickyNote, 
   LayoutGrid,
   MessageSquare,
   Settings,
+  Shield,
   X,
   Menu
 } from 'lucide-react';
@@ -13,12 +17,32 @@ import {
 function Sidebar({ isOpen, onToggle }) {
   const { synchoId } = useParams();
   const { theme } = useTheme();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const navItems = [
     { to: `notes`, icon: <StickyNote size={20} />, label: 'Ghi chú' },
     { to: `kanban`, icon: <LayoutGrid size={20} />, label: 'Kanban' },
     { to: `whiteboard`, icon: <MessageSquare size={20} />, label: 'Bảng trắng' }
   ];
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const docRef = doc(db, 'storages', synchoId);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          setIsAdmin(docSnap.data().isAdmin || false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    if (synchoId) {
+      checkAdminStatus();
+    }
+  }, [synchoId]);
 
   return (
     <>
@@ -93,8 +117,32 @@ function Sidebar({ isOpen, onToggle }) {
           </ul>
         </nav>
 
-        {/* Settings */}
-        <div className={`p-4 border-t ${theme.border}`}>
+        {/* Settings & Admin */}
+        <div className={`p-4 border-t ${theme.border} space-y-2`}>
+          {/* Admin Panel - Only visible for admin Synchos */}
+          {isAdmin && (
+            <NavLink
+              to={`/s/${synchoId}/admin`}
+              onClick={() => {
+                // Close sidebar on mobile after navigation
+                if (window.innerWidth < 1024) {
+                  onToggle();
+                }
+              }}
+              className={({ isActive }) => 
+                `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive 
+                    ? `bg-purple-500/20 text-purple-400 shadow-lg` 
+                    : `text-purple-400/70 hover:bg-purple-500/10 hover:text-purple-400`
+                }`
+              }
+            >
+              <Shield size={20} className="mr-3" />
+              <span className="flex-1">Quản lý</span>
+              <span className="text-xs bg-purple-500/20 px-2 py-1 rounded-full">Admin</span>
+            </NavLink>
+          )}
+          
           <NavLink
             to={`/s/${synchoId}/settings`}
             onClick={() => {
