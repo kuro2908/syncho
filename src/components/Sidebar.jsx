@@ -50,7 +50,7 @@ function Sidebar({ isOpen, onToggle }) {
       {!isOpen && (
         <button
           onClick={onToggle}
-          className={`fixed bottom-6 left-6 z-50 lg:hidden p-4 ${theme.bgSecondary} hover:${theme.bgTertiary} ${theme.text} rounded-full shadow-2xl transition-all duration-300 hover:scale-110`}
+          className={`fixed bottom-6 left-6 z-[9999] lg:hidden p-4 ${theme.bgSecondary} hover:${theme.bgTertiary} ${theme.text} rounded-full shadow-2xl transition-all duration-300 hover:scale-110`}
           aria-label="Toggle sidebar"
         >
           <Menu size={24} />
@@ -60,7 +60,7 @@ function Sidebar({ isOpen, onToggle }) {
       {/* Overlay for mobile */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] lg:hidden"
           onClick={onToggle}
         />
       )}
@@ -68,7 +68,7 @@ function Sidebar({ isOpen, onToggle }) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 z-40 h-screen
+          fixed lg:sticky top-0 left-0 z-[9999] lg:z-10 h-screen
           w-72 ${theme.bgSecondary} border-r ${theme.border} 
           flex flex-col
           transition-transform duration-300 ease-in-out

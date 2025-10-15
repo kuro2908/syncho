@@ -21,16 +21,20 @@ function NoteEditorPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const titleInputRef = useRef(null);
   const contentTextareaRef = useRef(null);
+  const containerRef = useRef(null);
 
   // Handle scroll to shrink header
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(container.scrollTop > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [note]);
 
   // Set up real-time listener for the note
   useEffect(() => {
@@ -139,7 +143,7 @@ function NoteEditorPage() {
   }
 
   return (
-    <div className={`min-h-screen ${theme.bg}`} style={{ '--header-height': isScrolled ? '56px' : '72px' }}>
+    <div ref={containerRef} className={`h-full overflow-y-auto ${theme.bg}`} style={{ '--header-height': isScrolled ? '56px' : '72px' }}>
       {/* Elegant Top Bar - Shrinks on scroll */}
       <div className={`border-b ${theme.border} ${theme.bgSecondary} backdrop-blur-xl sticky top-0 z-50 shadow-lg transition-all duration-300 ${isScrolled ? 'py-2' : ''}`}>
         <div className={`max-w-6xl mx-auto px-4 md:px-8 lg:px-16 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'py-2' : 'py-4 md:py-6'}`}>

@@ -55,9 +55,9 @@ function WorkspacePage() {
   }
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} flex relative`}>
+    <div className={`h-screen ${theme.bg} ${theme.text} flex overflow-hidden`}>
       <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <main className="flex-1">
+      <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>
     </div>

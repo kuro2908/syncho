@@ -5,19 +5,10 @@ import HomePage from './pages/HomePage';
 import WorkspacePage from './pages/WorkspacePage';
 import NotesPage from './pages/NotesPage';
 import NoteEditorPage from './pages/NoteEditorPage';
+import KanbanPage from './pages/KanbanPage';
+import KanbanBoardPage from './pages/KanbanBoardPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminPage from './pages/AdminPage';
-
-// Placeholder components for other routes
-function KanbanPage() {
-  const { theme } = useTheme();
-  return (
-    <div className={`p-8 ${theme.bg} ${theme.text} min-h-screen`}>
-      <h1 className="text-2xl font-bold mb-4">Kanban Board</h1>
-      <p className={theme.textMuted}>Tính năng đang được phát triển...</p>
-    </div>
-  );
-}
 
 function WhiteboardPage() {
   const { theme } = useTheme();
@@ -39,6 +30,7 @@ function App() {
           <Route path="notes" element={<NotesPage />} />
           <Route path="notes/:noteId" element={<NoteEditorPage />} />
           <Route path="kanban" element={<KanbanPage />} />
+          <Route path="kanban/:boardId" element={<KanbanBoardPage />} />
           <Route path="whiteboard" element={<WhiteboardPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="admin" element={<AdminPage />} />

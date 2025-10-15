@@ -15,13 +15,14 @@ import {
 } from 'lucide-react';
 
 const RichTextEditor = ({ value, onChange, placeholder }) => {
-  const { theme } = useTheme();
+  const { theme, currentTheme } = useTheme();
   const editorRef = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [selectedText, setSelectedText] = useState('');
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [currentColor, setCurrentColor] = useState('#ffffff');
+  // Set default caret color based on theme: black for light mode, white for dark modes
+  const [currentColor, setCurrentColor] = useState(currentTheme === 'light' ? '#000000' : '#ffffff');
   const [activeFormats, setActiveFormats] = useState({
     bold: false,
     italic: false,
@@ -37,11 +38,15 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
   // Font sizes
   const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px'];
   
-  // Colors
-  const colors = [
-    '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
-    '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'
-  ];
+  // Colors - adapt based on theme
+  const colors = currentTheme === 'light' 
+    ? ['#000000', '#1f2937', '#dc2626', '#16a34a', '#2563eb', '#ca8a04', '#9333ea', '#0891b2', '#ea580c', '#be123c']
+    : ['#ffffff', '#e5e7eb', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
+
+  // Update caret color when theme changes
+  useEffect(() => {
+    setCurrentColor(currentTheme === 'light' ? '#000000' : '#ffffff');
+  }, [currentTheme]);
 
   // Initialize content
   useEffect(() => {
@@ -122,16 +127,16 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
   };
 
   return (
-    <div className="relative mb-6 -mx-4 px-4 md:mx-0 md:px-0">
+    <div className="relative mb-6 max-w-4xl mx-auto">
       {/* Sticky Toolbar - Always visible when scrolling - Responsive */}
       <div 
-        className={`sticky z-20 ${theme.bgSecondary} ${theme.border} border rounded-xl shadow-xl p-2 md:p-3 overflow-x-auto overflow-y-hidden backdrop-blur-sm bg-opacity-95`}
+        className={`sticky z-30 ${theme.bgSecondary} rounded-xl shadow-lg p-2 md:p-3 backdrop-blur-sm bg-opacity-95 mb-4 w-fit mx-auto`}
         style={{ 
           top: 'calc(var(--header-height, 72px) + 16px)',
           scrollbarWidth: 'thin'
         }}
       >
-        <div className="flex items-center gap-0.5 md:gap-1.5 min-w-max px-2">
+        <div className="flex items-center gap-0.5 md:gap-1.5 flex-wrap">
           {/* Bold */}
           <button
             onClick={() => execCommand('bold')}
@@ -197,7 +202,7 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
             {showColorPicker && (
               <div 
                 onMouseLeave={() => setShowColorPicker(false)}
-                className={`absolute top-full left-0 mt-2 ${theme.bgSecondary} ${theme.border} border rounded-xl p-4 shadow-2xl z-50 w-max`}
+                className={`absolute top-full left-0 mt-2 ${theme.bgSecondary} border-2 ${theme.border} rounded-xl p-4 shadow-2xl z-[100] w-max`}
               >
                 <div className="grid grid-cols-5 gap-3">
                   {colors.map((color) => (
@@ -277,11 +282,12 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
         contentEditable={true}
         onInput={handleInput}
         suppressContentEditableWarning={true}
-        className={`w-full min-h-[500px] ${theme.bgSecondary} ${theme.text} p-6 rounded-lg outline-none border-2 ${theme.border} focus:border-sky-500 transition-all editor-content`}
+        className={`w-full min-h-[500px] ${theme.bg} ${theme.text} px-6 py-4 outline-none border-none transition-all editor-content`}
         style={{
           lineHeight: '1.8',
           fontSize: '18px',
-          caretColor: currentColor
+          caretColor: currentColor,
+          boxShadow: 'none'
         }}
         data-placeholder={placeholder}
       />
@@ -295,6 +301,12 @@ const RichTextEditor = ({ value, onChange, placeholder }) => {
         
         .editor-content {
           caret-color: ${currentColor};
+        }
+        
+        .editor-content:focus {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
         }
       `}</style>
     </div>

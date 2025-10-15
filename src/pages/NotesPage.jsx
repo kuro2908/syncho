@@ -13,6 +13,14 @@ function NotesPage() {
   const [notes, setNotes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to strip HTML tags and get plain text
+  const stripHtml = (html) => {
+    if (!html) return '';
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   useEffect(() => {
     if (!synchoId) return;
 
@@ -100,7 +108,7 @@ function NotesPage() {
   }
 
   return (
-    <div className={`p-8 ${theme.bg}`}>
+    <div className={`p-8 ${theme.bg} h-full overflow-y-auto min-h-0`}>
       <h1 className={`text-2xl font-bold mb-6 ${theme.text}`}>Tất cả Ghi chú</h1>
       
       {notes.length === 0 ? (
@@ -119,8 +127,8 @@ function NotesPage() {
                 <h3 className={`font-medium ${theme.text} mb-2 line-clamp-1 pr-8`}>
                   {note.title || 'Không có tiêu đề'}
                 </h3>
-                <p className={`text-sm ${theme.textSecondary} line-clamp-4`}>
-                  {note.content || 'Không có nội dung'}
+                <p className={`text-sm ${theme.textSecondary} line-clamp-4`} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {stripHtml(note.content) || 'Không có nội dung'}
                 </p>
                 
                 {/* Delete Button */}
