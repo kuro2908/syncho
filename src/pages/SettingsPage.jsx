@@ -17,7 +17,7 @@ function SettingsPage() {
   ];
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} p-8`}>
+    <div className={`h-full overflow-y-auto min-h-0 ${theme.bg} ${theme.text} p-8`}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">

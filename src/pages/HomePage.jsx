@@ -279,7 +279,7 @@ function HomePage() {
       {/* Footer */}
       <div className="mt-16 text-center text-slate-500 text-sm">
         
-        <p className="mt-1">© {new Date().getFullYear()} Syncho. All rights reserved.</p>
+        <p className="mt-1"> {new Date().getFullYear()} Syncho</p>
       </div>
 
       {/* Password Modal for Creating Syncho */}

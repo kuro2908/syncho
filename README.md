@@ -1,93 +1,232 @@
-Syncho Workspace 🚀
-An open-source, real-time, all-in-one workspace inspired by Notion and Trello. Syncho Workspace allows users to create unique, shareable workspaces identified by a SynchoID. Each workspace is a versatile container for documents, task boards, whiteboards, notes, and images, designed to be fully responsive for both desktop and mobile use.
+# 🚀 Syncho - Collaborative Workspace Platform
 
-✨ Core Features
-ID-Based Workspaces: Create or access persistent, shareable workspaces using a unique SynchoID. No registration required.
+A modern, real-time collaborative workspace platform built with React and Firebase. Syncho allows users to create unique, shareable workspaces for notes, Kanban boards, and whiteboards - all synchronized in real-time.
 
-📄 Notion-like Docs: A rich-text editor with Markdown support for creating detailed documents with embedded images.
+![React](https://img.shields.io/badge/React-19.1.1-blue)
+![Vite](https://img.shields.io/badge/Vite-Latest-purple)
+![Firebase](https://img.shields.io/badge/Firebase-12.4.0-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-📊 Kanban Boards: Manage tasks and workflows with draggable cards, columns, and assignee tracking, similar to Trello.
+## ✨ Features
 
-🎨 Digital Whiteboards: A freeform canvas for brainstorming, drawing, and visual collaboration, powered by an integrated library.
+### 🔐 **Workspace Management**
+- **ID-Based Workspaces**: Create or access persistent workspaces using a unique SynchoID
+- **No Registration Required**: Start collaborating immediately
+- **Admin Controls**: Lock/unlock workspaces, manage access
 
-📝 Quick Notes & Images: Simple storage for quick text notes and images.
+### 📝 **Rich Text Notes**
+- **WYSIWYG Editor**: Full-featured rich text editor with formatting tools
+- **Real-time Sync**: Changes are instantly synchronized across all users
+- **Auto-save**: Never lose your work with automatic saving
+- **Responsive Design**: Optimized for both desktop and mobile
 
-🏷️ Tagging System: Organize all items (Docs, Boards, etc.) with custom tags for easy filtering and searching.
+### 📊 **Kanban Boards**
+- **Drag & Drop**: Intuitive card and column management with @dnd-kit
+- **Task Management**: Add tasks with content, assignees, and deadlines
+- **Date Picker**: Set deadlines with an integrated calendar
+- **Visual Organization**: Multiple boards per workspace
+- **Horizontal Scroll**: Smooth mouse wheel scrolling for wide boards
 
-📱 Fully Responsive: A mobile-first design ensures a seamless experience on any device, from phones to desktops.
+### 🎨 **Themes**
+- **6 Beautiful Themes**: Dark, Light, Ocean Blue, Purple Dream, Forest Green, Rose Garden
+- **Persistent Settings**: Theme preferences saved per user
+- **Smooth Transitions**: Elegant theme switching animations
 
-☁️ Real-time Sync: All data is synchronized in real-time across all users in the same workspace, thanks to Firebase Firestore.
+### 📱 **Responsive Design**
+- **Mobile-First**: Optimized for all screen sizes
+- **Touch-Friendly**: Smooth interactions on mobile devices
+- **Adaptive Layout**: Sidebar collapses on mobile with overlay
 
-🛠️ Tech Stack
-Frontend: React (with Vite)
+## 🛠️ Tech Stack
 
-Styling: Tailwind CSS
+### **Frontend**
+- **React 19.1.1** - UI library
+- **Vite** - Build tool and dev server
+- **React Router DOM 7.9.4** - Client-side routing
+- **Tailwind CSS** - Utility-first styling
 
-Backend & Database: Firebase (Firestore, Storage, Hosting)
+### **Backend & Database**
+- **Firebase 12.4.0**
+  - Firestore - Real-time NoSQL database
+  - Authentication - User management
+  - Storage - File storage
 
-Routing: React Router
+### **Key Libraries**
+- **@dnd-kit** - Modern drag and drop
+  - `@dnd-kit/core` - Core functionality
+  - `@dnd-kit/sortable` - Sortable lists
+  - `@dnd-kit/utilities` - Helper utilities
+- **react-datepicker 8.7.0** - Date selection
+- **lucide-react 0.545.0** - Beautiful icons
+- **react-markdown 10.1.0** - Markdown rendering
 
-State Management: React Context / Hooks (or other libraries as needed)
+## 🚀 Getting Started
 
-Specialized Libraries:
+### Prerequisites
+- **Node.js** (version 18 or higher)
+- **npm** or **yarn**
+- **Firebase account** (for backend services)
 
-Drag & Drop for Kanban (e.g., react-beautiful-dnd)
+### Installation
 
-Whiteboard (e.g., tldraw)
+1. **Clone the repository**
+```bash
+git clone https://github.com/kuro2908/syncho.git
+cd syncho
+```
 
-🚀 Getting Started
-Follow these instructions to set up and run the project on your local machine.
-
-1. Prerequisites
-Make sure you have Node.js (version 18 or higher) installed on your system.
-
-2. Installation & Setup
-Clone the repository:
-
-Bash
-
-git clone https://github.com/your-username/syncho-workspace.git
-cd syncho-workspace
-Install dependencies:
-
-Bash
-
+2. **Install dependencies**
+```bash
 npm install
-Set up environment variables:
+```
 
-Create a file named .env.local in the root of the project.
+3. **Set up environment variables**
 
-Copy the contents of .env.example (if you create one) or add the required Firebase configuration variables as shown below.
+Create a `.env` file in the root directory:
 
-3. Environment Variables
-You need to create a Firebase project and get your web app configuration keys. Add them to your .env.local file:
-
-Đoạn mã
-
+```env
 # Firebase Configuration
-VITE_FIREBASE_API_KEY="your-api-key"
-VITE_FIREBASE_AUTH_DOMAIN="your-auth-domain"
-VITE_FIREBASE_PROJECT_ID="your-project-id"
-VITE_FIREBASE_STORAGE_BUCKET="your-storage-bucket"
-VITE_FIREBASE_MESSAGING_SENDER_ID="your-messaging-sender-id"
-VITE_FIREBASE_APP_ID="your-app-id"
-4. Run the Development Server
-Bash
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+```
 
+> **Note**: Get these values from your Firebase project settings
+
+4. **Run the development server**
+```bash
 npm run dev
-The application should now be running on http://localhost:5173.
+```
 
-☁️ Deployment
-This project is configured for easy deployment with Firebase Hosting.
+The application will be available at `http://localhost:5173`
 
-Build the project for production:
+### Build for Production
 
-Bash
-
+```bash
 npm run build
-Deploy to Firebase:
-Make sure you have the Firebase CLI installed (npm install -g firebase-tools). Then run:
+```
 
-Bash
+The built files will be in the `dist` directory.
 
-firebase deploy
+## 🌐 Deployment
+
+### Deploy to Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Go to [vercel.com](https://vercel.com)
+3. Import your repository
+4. Add environment variables
+5. Deploy!
+
+Vercel will automatically:
+- Detect Vite configuration
+- Build the project
+- Deploy to CDN
+- Setup custom domain (optional)
+
+### Deploy to Render
+
+1. Create a new Static Site on Render
+2. Connect your repository
+3. Set build command: `npm install && npm run build`
+4. Set publish directory: `dist`
+5. Add environment variables
+6. Deploy!
+
+## 📁 Project Structure
+
+```
+syncho/
+├── src/
+│   ├── components/          # Reusable components
+│   │   ├── KanbanCard.jsx
+│   │   ├── KanbanColumn.jsx
+│   │   ├── RichTextEditor.jsx
+│   │   ├── Sidebar.jsx
+│   │   └── ...
+│   ├── contexts/            # React contexts
+│   │   ├── ThemeContext.jsx
+│   │   └── ToastContext.jsx
+│   ├── pages/               # Page components
+│   │   ├── HomePage.jsx
+│   │   ├── NotesPage.jsx
+│   │   ├── NoteEditorPage.jsx
+│   │   ├── KanbanPage.jsx
+│   │   ├── KanbanBoardPage.jsx
+│   │   ├── SettingsPage.jsx
+│   │   └── WorkspacePage.jsx
+│   ├── styles/              # CSS files
+│   │   ├── datepicker-custom.css
+│   │   └── kanban-custom.css
+│   ├── firebase.js          # Firebase configuration
+│   ├── App.jsx              # Main app component
+│   └── main.jsx             # Entry point
+├── public/                  # Static assets
+├── .env                     # Environment variables (not committed)
+├── package.json             # Dependencies
+├── vite.config.js           # Vite configuration
+└── README.md                # This file
+```
+
+## 🎨 Features in Detail
+
+### Notes System
+- Create and edit rich text notes
+- Auto-save functionality
+- Real-time synchronization
+- Responsive editor with sticky toolbar
+- Support for bold, italic, underline, strikethrough
+- Text alignment and lists
+- Color picker for text
+- Font size selection
+
+### Kanban Boards
+- Create multiple boards per workspace
+- Drag and drop cards between columns
+- Drag and drop to reorder columns
+- Add/edit/delete tasks
+- Assign tasks to team members
+- Set deadlines with date picker
+- Visual deadline indicators (overdue, today, upcoming)
+- Horizontal scroll with mouse wheel
+- Smooth animations and transitions
+
+### Theme System
+- 6 pre-built themes
+- Instant theme switching
+- Persistent theme preferences
+- Smooth color transitions
+- Consistent design across all components
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 👨‍💻 Author
+
+**kuro2908**
+- GitHub: [@kuro2908](https://github.com/kuro2908)
+
+## 🙏 Acknowledgments
+
+- Icons by [Lucide](https://lucide.dev/)
+- Drag and drop by [@dnd-kit](https://dndkit.com/)
+- Styling with [Tailwind CSS](https://tailwindcss.com/)
+- Backend by [Firebase](https://firebase.google.com/)
+
+---
+
+Made with ❤️ by kuro2908
