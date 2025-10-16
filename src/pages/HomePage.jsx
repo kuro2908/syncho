@@ -9,7 +9,6 @@ function HomePage() {
   const [accessId, setAccessId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showAccessPasswordModal, setShowAccessPasswordModal] = useState(false);
   const [showLockedModal, setShowLockedModal] = useState(false);
   const [tempPassword, setTempPassword] = useState('');
   const [pendingSynchoId, setPendingSynchoId] = useState('');
@@ -98,16 +97,9 @@ function HomePage() {
           return;
         }
         
-        // Check if Syncho has password
-        if (synchoData.password) {
-          // Show password modal
-          setPendingSynchoId(accessId);
-          setShowAccessPasswordModal(true);
-          setIsLoading(false);
-        } else {
-          // Public Syncho, access directly
-          navigate(`/s/${accessId}`);
-        }
+        // Navigate directly to workspace
+        // Password check will be handled by WorkspacePage
+        navigate(`/s/${accessId}`);
       } else {
         showToast('Không tìm thấy Syncho. Vui lòng kiểm tra lại SynchoID.', 'error');
         setIsLoading(false);
@@ -119,27 +111,6 @@ function HomePage() {
     }
   };
 
-  const handleConfirmAccess = async (password) => {
-    setIsLoading(true);
-    try {
-      const docRef = doc(db, 'storages', pendingSynchoId);
-      const docSnap = await getDoc(docRef);
-      const synchoData = docSnap.data();
-
-      if (password === synchoData.password) {
-        setShowAccessPasswordModal(false);
-        setTempPassword('');
-        navigate(`/s/${pendingSynchoId}`);
-      } else {
-        showToast('Mật khẩu không đúng. Vui lòng thử lại.', 'error');
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error('Lỗi:', error);
-      showToast(`Đã xảy ra lỗi: ${error.message}`, 'error');
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col items-center justify-center p-4">
@@ -324,56 +295,6 @@ function HomePage() {
                 disabled={isLoading}
               >
                 {tempPassword ? 'Tạo với mật khẩu' : 'Tạo công khai'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Password Modal for Accessing Syncho */}
-      {showAccessPasswordModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-700 animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-              Nhập mật khẩu
-            </h3>
-            <p className="text-slate-300 mb-6">
-              Syncho này yêu cầu mật khẩu để truy cập
-            </p>
-            
-            <div className="space-y-4 mb-6">
-              <input
-                type="password"
-                value={tempPassword}
-                onChange={(e) => setTempPassword(e.target.value)}
-                placeholder="Nhập mật khẩu"
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-transparent placeholder-slate-500"
-                disabled={isLoading}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && tempPassword) {
-                    handleConfirmAccess(tempPassword);
-                  }
-                }}
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowAccessPasswordModal(false);
-                  setTempPassword('');
-                }}
-                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
-                disabled={isLoading}
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => handleConfirmAccess(tempPassword)}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl transition-all disabled:opacity-50"
-                disabled={isLoading || !tempPassword}
-              >
-                Truy cập
               </button>
             </div>
           </div>

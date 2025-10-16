@@ -7,7 +7,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { 
   StickyNote, 
   LayoutGrid,
-  MessageSquare,
+  Presentation,
   Settings,
   Shield,
   X,
@@ -22,7 +22,7 @@ function Sidebar({ isOpen, onToggle }) {
   const navItems = [
     { to: `notes`, icon: <StickyNote size={20} />, label: 'Ghi chú' },
     { to: `kanban`, icon: <LayoutGrid size={20} />, label: 'Kanban' },
-    { to: `whiteboard`, icon: <MessageSquare size={20} />, label: 'Bảng trắng' }
+    { to: `whiteboard`, icon: <Presentation size={20} />, label: 'Bảng trắng' }
   ];
 
   useEffect(() => {
