@@ -78,7 +78,7 @@ function KanbanColumn({ column, tasks, onAddTask, onDeleteColumn, onUpdateTitle,
                 />
                 <button
                   onClick={handleSaveTitle}
-                  className={`p-1 ${theme.accent} text-white rounded hover:opacity-80`}
+                  className={`p-1 ${theme.accent} ${theme.accentButtonText} rounded hover:opacity-80`}
                 >
                   <Check size={16} />
                 </button>
@@ -141,7 +141,7 @@ function KanbanColumn({ column, tasks, onAddTask, onDeleteColumn, onUpdateTitle,
       {/* Add Task Button */}
       <button
         onClick={onAddTask}
-        className={`w-full flex items-center justify-center gap-2 ${theme.bgTertiary} hover:${theme.accent} ${theme.textMuted} hover:text-white px-4 py-2.5 rounded-xl transition-all duration-300 text-sm font-semibold hover:scale-[1.02] hover:shadow-md`}
+        className={`w-full flex items-center justify-center gap-2 ${theme.bgTertiary} hover:${theme.accent} ${theme.textMuted} hover:${theme.accentButtonText} px-4 py-2.5 rounded-xl transition-all duration-300 text-sm font-semibold hover:scale-[1.02] hover:shadow-md`}
       >
         <Plus size={18} />
         <span>Thêm thẻ</span>

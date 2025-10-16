@@ -4,14 +4,18 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { collection, query, where, onSnapshot, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import { Plus, Trash2 } from 'lucide-react';
 
 function NotesPage() {
   const { synchoId } = useParams();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { showToast } = useToast();
   const [notes, setNotes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState(null);
 
   // Helper function to strip HTML tags and get plain text
   const stripHtml = (html) => {
@@ -78,18 +82,31 @@ function NotesPage() {
     }
   };
 
-  const handleDeleteNote = async (e, noteId) => {
+  const handleDeleteNote = (e, note) => {
     e.preventDefault(); // Prevent navigation to note editor
     e.stopPropagation(); // Stop event bubbling
+    setNoteToDelete(note);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteNote = async () => {
+    if (!noteToDelete) return;
     
-    if (window.confirm('Bạn có chắc chắn muốn xóa ghi chú này?')) {
-      try {
-        const noteRef = doc(db, 'storages', synchoId, 'items', noteId);
-        await deleteDoc(noteRef);
-      } catch (error) {
-        console.error('Error deleting note:', error);
-      }
+    try {
+      const noteRef = doc(db, 'storages', synchoId, 'items', noteToDelete.id);
+      await deleteDoc(noteRef);
+      showToast('Đã xóa ghi chú thành công!', 'success');
+      setShowDeleteConfirm(false);
+      setNoteToDelete(null);
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      showToast('Có lỗi xảy ra khi xóa ghi chú!', 'error');
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setNoteToDelete(null);
   };
 
   if (isLoading) {
@@ -133,7 +150,7 @@ function NotesPage() {
                 
                 {/* Delete Button */}
                 <button
-                  onClick={(e) => handleDeleteNote(e, note.id)}
+                  onClick={(e) => handleDeleteNote(e, note)}
                   className={`absolute top-3 right-3 p-2 ${theme.bgTertiary} hover:bg-red-500/20 text-red-400 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110`}
                   title="Xóa ghi chú"
                 >
@@ -148,11 +165,54 @@ function NotesPage() {
       {/* Floating Action Button */}
       <button
         onClick={handleCreateNewNote}
-        className={`fixed bottom-6 right-6 ${theme.accent} ${theme.accentHover} text-white rounded-full p-4 shadow-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2`}
+        className={`fixed bottom-6 right-6 ${theme.accent} ${theme.accentHover} ${theme.accentButtonText} rounded-full p-4 shadow-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2`}
         aria-label="Tạo ghi chú mới"
       >
         <Plus size={24} />
       </button>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && noteToDelete && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+          onClick={cancelDelete}
+        >
+          <div 
+            className={`${theme.bgSecondary} rounded-2xl shadow-2xl max-w-md w-full p-8 border ${theme.border} animate-in zoom-in-95 duration-200`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-red-500/20 rounded-xl">
+                <Trash2 size={28} className="text-red-400" />
+              </div>
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text} mb-2`}>Xóa ghi chú?</h3>
+                <p className={`${theme.textMuted} text-sm`}>Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            
+            <p className={`${theme.textSecondary} mb-8 leading-relaxed`}>
+              Bạn có chắc chắn muốn xóa ghi chú{' '}
+              <span className={`font-bold ${theme.text}`}>"{noteToDelete.title || 'Không có tiêu đề'}"</span>?
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDelete}
+                className={`flex-1 px-6 py-3 ${theme.bgTertiary} hover:opacity-80 ${theme.text} rounded-xl font-semibold transition-all duration-200 hover:scale-105`}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDeleteNote}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

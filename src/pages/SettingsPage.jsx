@@ -1,15 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Palette, Moon, Sun, Check, LogOut } from 'lucide-react';
+import { Palette, Moon, Sun, Check, LogOut, Circle, Contrast } from 'lucide-react';
 
 function SettingsPage() {
   const { theme, currentTheme, changeTheme, themes } = useTheme();
   const navigate = useNavigate();
 
   const themeOptions = [
-    { id: 'dark', name: 'Dark Mode', icon: Moon, preview: 'bg-slate-900' },
+    { id: 'dark', name: 'Blue Dark', icon: Moon, preview: 'bg-slate-900' },
+    { id: 'pureDark', name: 'Pure Dark', icon: Circle, preview: 'bg-black' },
+    { id: 'darkHighContrast', name: 'Dark High Contrast', icon: Contrast, preview: 'bg-black' },
     { id: 'light', name: 'Light Mode', icon: Sun, preview: 'bg-gray-50' },
+    { id: 'lightHighContrast', name: 'Light High Contrast', icon: Contrast, preview: 'bg-white' },
     { id: 'blue', name: 'Ocean Blue', icon: Palette, preview: 'bg-blue-950' },
     { id: 'purple', name: 'Purple Dream', icon: Palette, preview: 'bg-purple-950' },
     { id: 'green', name: 'Forest Green', icon: Palette, preview: 'bg-green-950' },
@@ -63,8 +66,21 @@ function SettingsPage() {
                   )}
 
                   {/* Theme Preview */}
-                  <div className={`${option.preview} h-24 rounded-lg mb-4 flex items-center justify-center`}>
-                    <Icon size={32} className="text-white opacity-80" />
+                  <div className={`${option.preview} h-24 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden border ${
+                    option.id === 'darkHighContrast' ? 'border-white' : 
+                    option.id === 'lightHighContrast' ? 'border-black' : 
+                    option.id === 'pureDark' ? 'border-neutral-700' : 
+                    'border-transparent'
+                  }`}>
+                    <Icon size={32} className={`${
+                      option.id === 'lightHighContrast' || option.id === 'light' ? 'text-gray-800' : 'text-white'
+                    } opacity-80`} />
+                    {/* High Contrast Indicator */}
+                    {(option.id === 'darkHighContrast' || option.id === 'lightHighContrast') && (
+                      <div className="absolute top-2 right-2">
+                        <div className={`w-2 h-2 rounded-full ${option.id === 'darkHighContrast' ? 'bg-white' : 'bg-black'}`}></div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Theme Name */}

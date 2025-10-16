@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot, updateDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import { ArrowLeft, Save, Check, Trash2, Clock, Sparkles } from 'lucide-react';
 import StyledInput from '../components/StyledInput';
 import RichTextEditor from '../components/RichTextEditor';
@@ -12,6 +13,7 @@ function NoteEditorPage() {
   const { synchoId, noteId } = useParams();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { showToast } = useToast();
   const [note, setNote] = useState(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -99,9 +101,11 @@ function NoteEditorPage() {
     try {
       const noteRef = doc(db, 'storages', synchoId, 'items', noteId);
       await deleteDoc(noteRef);
+      showToast('Đã xóa ghi chú thành công!', 'success');
       navigate(`/s/${synchoId}/notes`, { replace: true });
     } catch (error) {
       console.error('Error deleting note:', error);
+      showToast('Có lỗi xảy ra khi xóa ghi chú!', 'error');
     }
   };
 

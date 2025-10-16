@@ -162,7 +162,7 @@ function KanbanCard({ task, onDelete, onUpdate, isDragging = false, autoEdit = f
           <div className="flex items-center gap-2 justify-end">
             <button
               onClick={handleSave}
-              className={`px-3 py-1 ${theme.accent} text-white rounded text-xs font-medium hover:opacity-80`}
+              className={`px-3 py-1 ${theme.accent} ${theme.accentButtonText} rounded text-xs font-medium hover:opacity-80`}
             >
               Lưu
             </button>
@@ -216,7 +216,7 @@ function KanbanCard({ task, onDelete, onUpdate, isDragging = false, autoEdit = f
               e.stopPropagation();
               setIsEditing(true);
             }}
-            className={`p-1.5 ${theme.bgSecondary} hover:${theme.accent} ${theme.textMuted} hover:text-white rounded-lg transition-all duration-200 cursor-pointer hover:scale-110`}
+            className={`p-1.5 ${theme.bgSecondary} hover:${theme.accent} ${theme.textMuted} hover:${theme.accentButtonText} rounded-lg transition-all duration-200 cursor-pointer hover:scale-110`}
             title="Chỉnh sửa"
           >
             <Edit2 size={14} />

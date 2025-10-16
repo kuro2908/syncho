@@ -12,7 +12,7 @@ export const useTheme = () => {
 
 const themes = {
   dark: {
-    name: 'Dark',
+    name: 'Blue Dark',
     bg: 'bg-slate-900',
     bgSecondary: 'bg-slate-800',
     bgTertiary: 'bg-slate-700',
@@ -22,7 +22,36 @@ const themes = {
     border: 'border-slate-700',
     accent: 'bg-sky-600',
     accentHover: 'hover:bg-sky-700',
-    accentText: 'text-sky-400'
+    accentText: 'text-sky-400',
+    accentButtonText: 'text-white'
+  },
+  pureDark: {
+    name: 'Pure Dark',
+    bg: 'bg-black',
+    bgSecondary: 'bg-neutral-900',
+    bgTertiary: 'bg-neutral-800',
+    text: 'text-white',
+    textSecondary: 'text-neutral-300',
+    textMuted: 'text-neutral-400',
+    border: 'border-neutral-800',
+    accent: 'bg-neutral-700',
+    accentHover: 'hover:bg-neutral-600',
+    accentText: 'text-neutral-300',
+    accentButtonText: 'text-white'
+  },
+  darkHighContrast: {
+    name: 'Dark High Contrast',
+    bg: 'bg-black',
+    bgSecondary: 'bg-neutral-950',
+    bgTertiary: 'bg-neutral-900',
+    text: 'text-white',
+    textSecondary: 'text-gray-100',
+    textMuted: 'text-gray-300',
+    border: 'border-white',
+    accent: 'bg-white',
+    accentHover: 'hover:bg-gray-200',
+    accentText: 'text-black',
+    accentButtonText: 'text-black'
   },
   light: {
     name: 'Light',
@@ -35,7 +64,22 @@ const themes = {
     border: 'border-gray-200',
     accent: 'bg-blue-600',
     accentHover: 'hover:bg-blue-700',
-    accentText: 'text-blue-600'
+    accentText: 'text-blue-600',
+    accentButtonText: 'text-white'
+  },
+  lightHighContrast: {
+    name: 'Light High Contrast',
+    bg: 'bg-white',
+    bgSecondary: 'bg-gray-50',
+    bgTertiary: 'bg-gray-100',
+    text: 'text-black',
+    textSecondary: 'text-gray-900',
+    textMuted: 'text-gray-700',
+    border: 'border-black',
+    accent: 'bg-black',
+    accentHover: 'hover:bg-gray-900',
+    accentText: 'text-black',
+    accentButtonText: 'text-white'
   },
   blue: {
     name: 'Ocean Blue',
@@ -48,7 +92,8 @@ const themes = {
     border: 'border-blue-700',
     accent: 'bg-cyan-500',
     accentHover: 'hover:bg-cyan-600',
-    accentText: 'text-cyan-400'
+    accentText: 'text-cyan-400',
+    accentButtonText: 'text-white'
   },
   purple: {
     name: 'Purple Dream',
@@ -61,7 +106,8 @@ const themes = {
     border: 'border-purple-700',
     accent: 'bg-pink-500',
     accentHover: 'hover:bg-pink-600',
-    accentText: 'text-pink-400'
+    accentText: 'text-pink-400',
+    accentButtonText: 'text-white'
   },
   green: {
     name: 'Forest Green',
@@ -74,7 +120,8 @@ const themes = {
     border: 'border-green-700',
     accent: 'bg-emerald-500',
     accentHover: 'hover:bg-emerald-600',
-    accentText: 'text-emerald-400'
+    accentText: 'text-emerald-400',
+    accentButtonText: 'text-white'
   },
   rose: {
     name: 'Rose Garden',
@@ -87,7 +134,8 @@ const themes = {
     border: 'border-rose-700',
     accent: 'bg-pink-500',
     accentHover: 'hover:bg-pink-600',
-    accentText: 'text-pink-400'
+    accentText: 'text-pink-400',
+    accentButtonText: 'text-white'
   }
 };
 

@@ -4,14 +4,18 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import { Plus, Trash2, Columns3 } from 'lucide-react';
 
 function KanbanPage() {
   const { synchoId } = useParams();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { showToast } = useToast();
   const [boards, setBoards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [boardToDelete, setBoardToDelete] = useState(null);
 
   useEffect(() => {
     if (!synchoId) return;
@@ -87,18 +91,31 @@ function KanbanPage() {
     }
   };
 
-  const handleDeleteBoard = async (e, boardId) => {
+  const handleDeleteBoard = (e, board) => {
     e.preventDefault();
     e.stopPropagation();
+    setBoardToDelete(board);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteBoard = async () => {
+    if (!boardToDelete) return;
     
-    if (window.confirm('Bạn có chắc chắn muốn xóa bảng Kanban này?')) {
-      try {
-        const boardRef = doc(db, 'storages', synchoId, 'items', boardId);
-        await deleteDoc(boardRef);
-      } catch (error) {
-        console.error('Error deleting board:', error);
-      }
+    try {
+      const boardRef = doc(db, 'storages', synchoId, 'items', boardToDelete.id);
+      await deleteDoc(boardRef);
+      showToast('Đã xóa bảng Kanban thành công!', 'success');
+      setShowDeleteConfirm(false);
+      setBoardToDelete(null);
+    } catch (error) {
+      console.error('Error deleting board:', error);
+      showToast('Có lỗi xảy ra khi xóa bảng Kanban!', 'error');
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setBoardToDelete(null);
   };
 
   const getTaskCount = (board) => {
@@ -136,7 +153,7 @@ function KanbanPage() {
           <p className={`${theme.textSecondary} mb-6 text-lg`}>Chưa có bảng Kanban nào</p>
           <button
             onClick={handleCreateNewBoard}
-            className={`${theme.accent} ${theme.accentHover} text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+            className={`${theme.accent} ${theme.accentHover} ${theme.accentButtonText} px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl`}
           >
             Tạo bảng đầu tiên
           </button>
@@ -172,7 +189,7 @@ function KanbanPage() {
                 
                 {/* Delete Button */}
                 <button
-                  onClick={(e) => handleDeleteBoard(e, board.id)}
+                  onClick={(e) => handleDeleteBoard(e, board)}
                   className={`absolute top-4 right-4 p-2 ${theme.bgTertiary} hover:bg-red-500/20 text-red-400 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110`}
                   title="Xóa bảng"
                 >
@@ -188,11 +205,56 @@ function KanbanPage() {
       {boards.length > 0 && (
         <button
           onClick={handleCreateNewBoard}
-          className={`fixed bottom-8 right-8 ${theme.accent} ${theme.accentHover} text-white rounded-full p-5 shadow-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-110 hover:rotate-90`}
+          className={`fixed bottom-8 right-8 ${theme.accent} ${theme.accentHover} ${theme.accentButtonText} rounded-full p-5 shadow-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:scale-110 hover:rotate-90`}
           aria-label="Tạo bảng Kanban mới"
         >
           <Plus size={24} />
         </button>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && boardToDelete && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+          onClick={cancelDelete}
+        >
+          <div 
+            className={`${theme.bgSecondary} rounded-2xl shadow-2xl max-w-md w-full p-8 border ${theme.border} animate-in zoom-in-95 duration-200`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-red-500/20 rounded-xl">
+                <Trash2 size={28} className="text-red-400" />
+              </div>
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text} mb-2`}>Xóa bảng Kanban?</h3>
+                <p className={`${theme.textMuted} text-sm`}>Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            
+            <p className={`${theme.textSecondary} mb-8 leading-relaxed`}>
+              Bạn có chắc chắn muốn xóa bảng{' '}
+              <span className={`font-bold ${theme.text}`}>"{boardToDelete.title || 'Không có tiêu đề'}"</span>?
+              <br />
+              <span className="text-red-400 font-semibold">Tất cả cột và thẻ trong bảng sẽ bị xóa.</span>
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDelete}
+                className={`flex-1 px-6 py-3 ${theme.bgTertiary} hover:opacity-80 ${theme.text} rounded-xl font-semibold transition-all duration-200 hover:scale-105`}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDeleteBoard}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

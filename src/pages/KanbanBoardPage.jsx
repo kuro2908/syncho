@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import '../styles/kanban-custom.css';
 import { 
   DndContext, 
@@ -29,11 +30,14 @@ function KanbanBoardPage() {
   const { synchoId, boardId } = useParams();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { showToast } = useToast();
   const [boardData, setBoardData] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [newTaskId, setNewTaskId] = useState(null);
+  const [showDeleteColumnConfirm, setShowDeleteColumnConfirm] = useState(false);
+  const [columnToDelete, setColumnToDelete] = useState(null);
   const titleInputRef = useRef(null);
   const boardContentRef = useRef(null);
 
@@ -244,34 +248,51 @@ function KanbanBoardPage() {
 
   // Delete column
   const handleDeleteColumn = (columnId) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa cột này? Tất cả thẻ trong cột sẽ bị xóa.')) {
-      return;
-    }
-
     const column = boardData.columns[columnId];
-    const updatedTasks = { ...boardData.tasks };
-    
-    // Delete all tasks in the column
-    column.taskIds.forEach(taskId => {
-      delete updatedTasks[taskId];
-    });
+    setColumnToDelete({ id: columnId, column });
+    setShowDeleteColumnConfirm(true);
+  };
 
-    const updatedColumns = { ...boardData.columns };
-    delete updatedColumns[columnId];
+  const confirmDeleteColumn = async () => {
+    if (!columnToDelete) return;
 
-    const updatedColumnOrder = boardData.columnOrder.filter(id => id !== columnId);
+    try {
+      const { id: columnId, column } = columnToDelete;
+      const updatedTasks = { ...boardData.tasks };
+      
+      // Delete all tasks in the column
+      column.taskIds.forEach(taskId => {
+        delete updatedTasks[taskId];
+      });
 
-    const updatedData = {
-      tasks: updatedTasks,
-      columns: updatedColumns,
-      columnOrder: updatedColumnOrder
-    };
+      const updatedColumns = { ...boardData.columns };
+      delete updatedColumns[columnId];
 
-    setBoardData({
-      ...boardData,
-      ...updatedData
-    });
-    saveBoardData(updatedData);
+      const updatedColumnOrder = boardData.columnOrder.filter(id => id !== columnId);
+
+      const updatedData = {
+        tasks: updatedTasks,
+        columns: updatedColumns,
+        columnOrder: updatedColumnOrder
+      };
+
+      setBoardData({
+        ...boardData,
+        ...updatedData
+      });
+      await saveBoardData(updatedData);
+      showToast('Đã xóa cột thành công!', 'success');
+      setShowDeleteColumnConfirm(false);
+      setColumnToDelete(null);
+    } catch (error) {
+      console.error('Error deleting column:', error);
+      showToast('Có lỗi xảy ra khi xóa cột!', 'error');
+    }
+  };
+
+  const cancelDeleteColumn = () => {
+    setShowDeleteColumnConfirm(false);
+    setColumnToDelete(null);
   };
 
   // Update column title
@@ -430,7 +451,7 @@ function KanbanBoardPage() {
                 />
                 <button
                   onClick={handleSaveTitle}
-                  className={`p-2 ${theme.accent} text-white rounded-lg hover:opacity-80 transition-all duration-200 hover:scale-105`}
+                  className={`p-2 ${theme.accent} ${theme.accentButtonText} rounded-lg hover:opacity-80 transition-all duration-200 hover:scale-105`}
                 >
                   <Check size={20} />
                 </button>
@@ -461,7 +482,7 @@ function KanbanBoardPage() {
 
           <button
             onClick={handleAddColumn}
-            className={`flex items-center gap-2 ${theme.accent} ${theme.accentHover} text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg`}
+            className={`flex items-center gap-2 ${theme.accent} ${theme.accentHover} ${theme.accentButtonText} px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg`}
           >
             <Plus size={20} />
             <span>Thêm cột</span>
@@ -512,6 +533,51 @@ function KanbanBoardPage() {
           </DragOverlay>
         </DndContext>
       </div>
+
+      {/* Delete Column Confirmation Modal */}
+      {showDeleteColumnConfirm && columnToDelete && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+          onClick={cancelDeleteColumn}
+        >
+          <div 
+            className={`${theme.bgSecondary} rounded-2xl shadow-2xl max-w-md w-full p-8 border ${theme.border} animate-in zoom-in-95 duration-200`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-red-500/20 rounded-xl">
+                <Trash2 size={28} className="text-red-400" />
+              </div>
+              <div>
+                <h3 className={`text-2xl font-bold ${theme.text} mb-2`}>Xóa cột?</h3>
+                <p className={`${theme.textMuted} text-sm`}>Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            
+            <p className={`${theme.textSecondary} mb-8 leading-relaxed`}>
+              Bạn có chắc chắn muốn xóa cột{' '}
+              <span className={`font-bold ${theme.text}`}>"{columnToDelete.column.title || 'Không có tiêu đề'}"</span>?
+              <br />
+              <span className="text-red-400 font-semibold">Tất cả {columnToDelete.column.taskIds.length} thẻ trong cột sẽ bị xóa.</span>
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDeleteColumn}
+                className={`flex-1 px-6 py-3 ${theme.bgTertiary} hover:opacity-80 ${theme.text} rounded-xl font-semibold transition-all duration-200 hover:scale-105`}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmDeleteColumn}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-semibold transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
